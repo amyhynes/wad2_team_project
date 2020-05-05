@@ -30,8 +30,8 @@ class Category(models.Model):
 
 class Chef(models.Model):
 	user = models.OneToOneField(User)
-	photo = models.ImageField(upload_to='profile_pics', default='anon.png')
-	bio = models.TextField(default="Hello! I enjoy making food the opportunity to upload recipes, share tips, and explore recipes on this website!")
+	photo = models.ImageField(upload_to='profile_pics', default='profile_pics/anon.png')
+	bio = models.TextField(default="Hello! I enjoy making food the opportunity to upload recipes, share tips, and explore recipes on this website!", blank=True)
 
 	def __str__(self):
 		return self.user.username
@@ -41,7 +41,7 @@ class Recipe(models.Model):
 	slug = models.SlugField(unique=True)
 	categories = models.ManyToManyField(Category)
 	name = models.CharField(max_length=128, unique=True)
-	photo = models.ImageField(upload_to='food_pics', blank=True)
+	photo = models.ImageField(upload_to='food_pics')
 	cook_time = models.IntegerField(default=0)
 	date_posted = models.DateTimeField(default=timezone.now)
 	ingredients = models.TextField(default="")

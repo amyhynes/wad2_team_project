@@ -5,27 +5,36 @@
   {{ chef.user.username }}
 {% endblock %}
 
-{% block name_block %}
-	{{ chef.user.username }}
-{% endblock %}
-
 {% block body_block %}
 	<div class="account">
 		<div class ="user_info">
-			<img class="profile" src="{{ MEDIA_URL }}{{ chef.photo }}" alt="Picture of {{ chef.user.first_name }}"/><br/>
-			<strong>Username :</strong>   {{ chef.user.username }}<br>
-			<strong>  Full name :</strong> {{ chef.user.get_full_name }}<br>
-			<strong> Date joined :</strong> {{ chef.user.date_joined }}
+			<div>
+				<img class="profile" src="{{ MEDIA_URL }}{{ chef.photo }}" alt="Picture of {{ chef.user.first_name }}"/><br/>
+				<strong>Username :</strong>   {{ chef.user.username }}<br>
+				<strong>  Full name :</strong> {{ chef.user.get_full_name }}<br>
+				<strong> Date joined :</strong> {{ chef.user.date_joined }}
+			</div>
+			<br/>
+			{% if chef.user.username == user.username %}
+				<div class="urls">
+					{% if user.is_authenticated %}
+						<a href="{% url 'edit_profile' user.username %}">Edit Profile</a>
+					{% endif %}
+					 <br>
+				</div>
+				<br>
+			{% endif %}
 		</div>
 
 		<div class="user_recipes">
+			<div class="page_name">{{ chef.user.get_full_name }}</div>
 			<h3>Bio</h3>
 				{{ chef.bio }}
 			<h3>Recipes</h3>
 			{% if recipes %}
 				{% for recipe in recipes %}
 					<div class="recipe">
-						<a href="{% url 'viewrecipe' recipe.slug %}"><img src="{{ MEDIA_URL }}{{ recipe.photo }}" alt="Picture of {{ recipe.photo }}" height="60"/></a>
+						<a href="{% url 'viewrecipe' recipe.slug %}"><img src="{{ MEDIA_URL }}{{ recipe.photo }}" alt="Picture of {{ recipe.photo }}" width="90"/></a>
 						<div>
 							<strong>{{ recipe.name }}</strong><br/>
 							{{ recipe.about }}
@@ -40,7 +49,7 @@
 			{% if reviews %}
 				{% for review in reviews %}
 					<div class="recipe">
-						<a href="{% url 'viewrecipe' review.recipe.slug %}"><img src="{{ MEDIA_URL }}{{ review.recipe.photo }}" alt="Picture of {{ review.recipe }}" height="60"/></a>
+						<a href="{% url 'viewrecipe' review.recipe.slug %}"><img src="{{ MEDIA_URL }}{{ review.recipe.photo }}" alt="Picture of {{ review.recipe }}" width="90"/></a>
 						<div>
 							<strong>{{ review.rating }}, {{ review.title }}</strong> -- {{ review.date_posted }}<br/>
 							{{ review.comment }}

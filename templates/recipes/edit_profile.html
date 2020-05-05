@@ -1,0 +1,43 @@
+{% extends 'recipes/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+   Edit Profile
+{% endblock %}
+
+{% block name_block %}
+	Edit Profile
+{% endblock %}
+
+{% block body_block %}
+
+	<div class="edit_class">
+		<form id="editprofile" method="post" enctype="multipart/form-data" action="{% url 'edit_profile' user.username %}">
+			{% csrf_token %}
+			{% for editfield in edit.visible_fields %}
+				{% if editfield.label != "Password" %}
+					{{ user.editfield.label }}
+					{{ editfield.errors }}
+					<strong>{{ editfield.label }}</strong><br/>
+					{{ editfield }}<br/>
+				{% endif %}
+			{% endfor %}
+
+			{% for biofield in bio.visible_fields %}
+				{% if biofield.label != "Password" %}
+					{{ biofield.errors }}
+					<strong>{{ biofield.label }}</strong><br/>
+					{{ biofield }}<br/>
+				{% endif %}
+			{% endfor %}
+			<input type="submit" name="submit" value="Make Changes" class="edit"></input>
+		</form>
+		<br>
+		<div class="urls">
+		{% if user.is_authenticated %}
+			<a href="{% url 'change_password' user.username %}">Change Password</a>
+		{% endif %}
+		</div>
+		<br/>
+	</div>
+{% endblock %}

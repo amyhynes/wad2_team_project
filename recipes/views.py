@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from recipes.models import *
 from recipes.forms import *
@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from datetime import datetime
 from django.db.models import Sum
+from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 # Create your views here.
 
 cats_bar = Category.objects.exclude(name__in=['Cuisines','Special Occasions']).order_by('name')
@@ -16,11 +18,11 @@ def index(request):
 	#get all recipes, order alphabetically by name
 	latest = Recipe.objects.order_by('-date_posted')[:6]
 	#get all categories -- no order
-	cuisines = Category.objects.filter(type="CUS").order_by('-likes')[:6]
+	users = User.objects.order_by('-date_joined')[:6]
 
-	top = Recipe.objects.order_by('name')[:6]
+	top = Recipe.objects.order_by('cook_time')[:6]
 
-	context_dict = {'latest':latest, 'cuisines':cuisines, 'top':top}
+	context_dict = {'latest':latest, 'users':users, 'top':top}
 	response = render(request,'recipes/index.html', context=context_dict)
 	return response
 
@@ -85,9 +87,12 @@ def user_login(request):
 				return HttpResponse("Your Rango account is disabled.")
 		else:
 			print("Invalid ligin details: {0},{1}".format(username, password))
-		return HttpResponseRedirect(reverse('index'))
+			return HttpResponseRedirect(reverse('invalidlogin'))
 	else:
 		return render(request, 'recipes/login.html', {})
+
+def invalidlogin(request):
+	return render(request,'recipes/invalidlogin.html', {})
 
 @login_required
 def user_logout(request):
@@ -119,20 +124,22 @@ def contact(request):
 			print(form.errors)
 	return render(request, 'recipes/contact.html', {'form':form})
 
+@login_required
 def addrecipe(request):
-	form = AddRecipeForm()
+	form = AddRecipeForm(request.FILES)
 	if request.method == 'POST':
-		form = AddRecipeForm(data=request.POST)
+		form = AddRecipeForm(request.POST, request.FILES)
 		if form.is_valid():
-			recipe = form.save(commit=False)
-			recipe.chef = request.user.username
+			recipe = form.save(request.user.username)
+			recipe.chef = request.user
 			cats = form.cleaned_data.get('categories')
 			if(len(cats) > 3):
 				raise forms.ValidationError("You can't select more than 3 items.")
 			else:
+				recipe.save()
 				for cat in cats:
 					category = Category.objects.get(id=cat)
-					recipes.categories.add(category)
+					recipe.categories.add(category)
 			recipe.save()
 			return HttpResponseRedirect(reverse('index'))
 		else:
@@ -143,7 +150,6 @@ def viewrecipe(request, recipe_name_slug):
 	context_dict = {'cats_bar':cats_bar}
 	try:
 		recipe = Recipe.objects.get(slug=recipe_name_slug)
-		print(recipe.slug,recipe.chef,recipe.cook_time)
 		reviews = Review.objects.filter(recipe=recipe).order_by("-date_posted")
 
 		if len(reviews) > 0:
@@ -165,6 +171,7 @@ def viewrecipe(request, recipe_name_slug):
 				review.recipe = recipe
 				review.author = request.user
 				review.save()
+				return redirect('/recipes/recipe/'+recipe_name_slug)
 		else:
 			print(form.errors)
 		context_dict["form"] = form
@@ -184,6 +191,40 @@ def userprofile(request, username):
 		context_dict['chef'] = None
 
 	return render(request, 'recipes/profile.html', context_dict)
+
+@login_required
+def edit_profile(request, username):
+	if request.method == 'POST':
+		edit = EditProfileForm(request.POST, request.FILES, instance=request.user)
+		bio  = EditBioForm(request.POST, request.FILES, instance=request.user.chef)
+		if edit.is_valid() and bio.is_valid():
+			edit.save()
+			bio.save()
+			return redirect('/recipes/profile/'+username)
+		else:
+			print(edit.errors, bio.errors)
+	else:
+		edit = EditProfileForm(request.FILES, instance=request.user)
+		bio = EditBioForm(request.FILES, instance=request.user.chef)
+
+	context_dict = {'edit':edit,'bio':bio}
+	return render(request, 'recipes/edit_profile.html', context_dict)
+
+@login_required
+def change_password(request, username):
+	if request.method=='POST':
+		form = PasswordChangeForm(data=request.POST, user=request.user)
+		if form.is_valid():
+			form.save()
+			update_session_auth_hash(request, form.user)
+			return redirect('index')
+		else:
+			print("Passwords did not match.")
+	else:
+		form=PasswordChangeForm(data=request.POST, user=request.user)
+	context_dict = {'form':form}
+
+	return render(request, 'recipes/change_password.html', context_dict)
 
 def show_category(request, cat_name_slug):
 	context_dict = {}

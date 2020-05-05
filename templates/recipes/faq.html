@@ -1,6 +1,8 @@
 {% extends 'recipes/base.html' %}
 {% load staticfiles %}
 
+
+
 {% block title_block %}
     FAQ
 {% endblock %}
@@ -10,14 +12,30 @@
 {% endblock %}
 
 {% block body_block %}
+<div class="faq_class">
+
+<button class="btn1" onclick="document.getElementById('demo').innerHTML=Date()">What is the time?</button>
+
+<h4 id="demo"></h4>
 
 <h1> How can we help? </h1>
 
 <h3> How do I make an account?</h3>
 
-<p> You can make an account using our sign up option located at the top of the screen </p>
+<p id="q1"> You can make an account using our sign up option located at the top of the screen </p>
+
+<button class="btn1">Hide Answer</button>
+<button class="btn2">Show Answer</button>
 
 <h3> Do I have to be logged in to leave a review? </h3>
 
-<p> Yes, in order to leave a review and comment you have to be logged in. You can view all the recipes without being logged in. </p>
+<p id="q2"> Yes, in order to leave a review and comment you have to be logged in. You can view all the recipes without being logged in. </p>
+
+<button class="btn3">Hide Answer </button>
+<button class="btn4">Show Answer </button>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
+</div>
 {% endblock %}

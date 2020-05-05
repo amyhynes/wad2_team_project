@@ -5,37 +5,67 @@
 	Index
 {% endblock %}
 
-{% block name_block %}
-
-{% endblock %}
-
 {% block body_block %}
 
 	<div class="index_page">
 
 		<div class="pop_cuisines">
-			<h3>Popular Cuisines</h3>
-			{% if cuisines %}
-				{% for cuisine in cuisines %}
-					<a href="{% url 'show_category' cuisine.slug %}"><img src="{{ MEDIA_URL }}{{ cuisine.photo }}" alt="Picture of {{ cuisine.photo }}"/></a>
-					<div class="cat_text">{{ cuisine.name }}</div>
+			<h3>New Chefs</h3>
+			{% if users %}
+				{% for u in users %}
+					<a href="{% url 'userprofile' u.username %}"><img src="{{ MEDIA_URL }}{{ u.chef.photo }}" alt="Picture of {{ u.get_full_name }}"/></a>
+					<div class="cat_text">{{ u.get_full_name }}</div>
 				{% endfor %}
 			{% endif %}
 		</div>
 
 		<div class="latest_posts">
-			<img class="index-logo" src="{% static "images/logo.png" %}" alt="Website Logo" width="70%"/>
-			<h2>Latest Posts</h2>
-			{% if latest %}
-				{% for post in latest %}
-					<a href="{% url 'viewrecipe' post.slug %}"><img src="{{ MEDIA_URL }}{{ post.photo }}" alt="Picture of {{ post.photo }}"/></a>
-					<div class="cat_text">{{ post.name }}</div>
-				{% endfor %}
-			{% endif %}
+			<img class="index-logo" src="{% static "images/logo.png" %}" alt="Website Logo" width="200"/>
+			<div class="carousel">
+				<link href="{% static 'css/flexslider.css' %}" rel="stylesheet" />
+				<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+				<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+				<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+				<div class="container" style="width:100%; height:320px" >
+					<h2>Latest Posts</h2>
+					<div id="myCarousel" class="carousel slide" data-ride="carousel">
+						<!-- Indicators -->
+						<ol class="carousel-indicators">
+							<li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+							{% for item in latest %}
+								<li data-target="#myCarousel" data-slide-to="{{ forloop.counter }}"></li>
+							{% endfor %}
+						</ol>
+						<!-- Wrapper for slides -->
+						<div class="carousel-inner" role="listbox" style="width:100%; height: 400px !important;">
+							{% for recipe in latest %}
+								{% if forloop.counter0 == 0 %}
+									<div class="item active">
+										<a href="{% url 'viewrecipe' latest.0.slug %}"><img src="{{ MEDIA_URL }}{{ latest.0.photo }}" alt="Picture of {{ latest.0.photo }}" style="width:100%; height:400px;"/></a>
+									</div>
+								{% else %}
+									<div class="item">
+										<a href="{% url 'viewrecipe' recipe.slug %}"><img src="{{ MEDIA_URL }}{{ recipe.photo }}" alt="Picture of {{ recipe.photo }}" style="width:100%; height:400px"/></a>
+									</div>
+								{% endif %}
+							{% endfor %}
+						</div>
+						<!-- Left and right controls -->
+						<a class="left carousel-control" href="#myCarousel" data-slide="prev">
+							<span class="glyphicon glyphicon-chevron-left"></span>
+							<span class="sr-only">Previous</span>
+						</a>
+						<a class="right carousel-control" href="#myCarousel" data-slide="next">
+							<span class="glyphicon glyphicon-chevron-right"></span>
+							<span class="sr-only">Next</span>
+						</a>
+					</div>
+				</div>
+			</div>
 		</div>
 
 		<div class="top_rated">
-			<h3>Top Rated Recipes</h3>
+			<h3>Featured Recipes</h3>
 			{% if top %}
 				{% for post in top %}
 					<a href="{% url 'viewrecipe' post.slug %}"><img src="{{ MEDIA_URL }}{{ post.photo }}" alt="Picture of {{ post.photo }}"/></a>

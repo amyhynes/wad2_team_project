@@ -1,6 +1,17 @@
 {% extends 'recipes/base.html' %}
 {% load staticfiles %}
 
+{% block js %}
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script>
+	$(document).ready(function(){
+		$("button").click(function() {
+			alert("Thanks for leaving a review!");
+		});
+	});
+	</script>
+{% endblock %}
+
 {% block title_block %}
   {{ recipe.name }}
 {% endblock %}
@@ -54,7 +65,7 @@
 			{% if reviews %}
 				{% for review in reviews %}
 					<div class="recipe">
-						<a href="{% url 'userprofile' review.author.username %}"><img src="{{ MEDIA_URL }}{{ review.author.chef.photo }}" alt="Picture of {{ review.author }}" height="60"/></a>
+						<a href="{% url 'userprofile' review.author.username %}"><img src="{{ MEDIA_URL }}{{ review.author.chef.photo }}" alt="Picture of {{ review.author }}" width="80"/></a>
 						<div>
 							<strong>{{ review.rating }}, {{ review.author }}</strong> -- {{ review.title }}<br/>
 							{{ review.comment }}
@@ -66,20 +77,20 @@
 			{% endif %}
 			</div>
 			{% if user.is_authenticated %}
-			{% if recipe %}
-				<h3>Leave a Review</h3>
-				<div class="give">
-					<form id="review_form" method="post" action={% url 'viewrecipe' recipe.slug %}>
-						{% csrf_token %}
-						{% for field in form.visible_fields %}
-						{{ field.errors }}
-							{{ field.label }}<br/>
-							{{ field }}<br/>
-						{% endfor %}
-						<input type="submit" name="submit" value="Submit" />
-				</form>
-				</div>
-			{% endif %}
+				{% if recipe %}
+					<div class="give">
+						<h3>Leave a Review</h3>
+						<form id="review_form" method="post" action={% url 'viewrecipe' recipe.slug %}>
+							{% csrf_token %}
+							{% for field in form.visible_fields %}
+								{{ field.errors }}
+								{{ field.label }}<br/>
+								{{ field }}<br/>
+							{% endfor %}
+							<button type="submit" name="submit" value="Submit">Submit</button>
+						</form>
+					</div>
+				{% endif %}
 			{% endif %}
 		</div>
 	</div>
